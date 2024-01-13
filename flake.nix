@@ -31,7 +31,7 @@
         octokit-webhooks = pkgs.fetchFromGitHub {
           owner = "octokit";
           repo = "webhooks";
-          rev = "v7.3.1";
+          rev = "v7.3.1"; # WARN: this should be synced with github-webhook/Cargo.toml
           hash = "sha256-ckGVw5owHTv1h73LGan6mn4PZls4sNjRo/n+rrJHqe0=";
         };
 
