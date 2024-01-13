@@ -5,6 +5,8 @@ use std::env;
 use github_webhook_dts_downloader::run_transform;
 
 fn main() -> Result<()> {
+    println!("cargo:rerun-if-env-changed=WEBHOOK_SCHEMA_DTS");
+
     let manifest_dir = env!("CARGO_MANIFEST_DIR").to_string();
     let metadata = MetadataCommand::new()
         .manifest_path(manifest_dir + "/Cargo.toml")
@@ -37,10 +39,17 @@ fn main() -> Result<()> {
         .unwrap()
         .to_string();
 
-    run_transform(github_webhook_dts_downloader::Opt {
+    let out_path_ts = env::var("WEBHOOK_SCHEMA_DTS")
+        .ok()
+        .map(|p| p.parse().unwrap())
+        .map(github_webhook_dts_downloader::OutPathTs)
+        .unwrap_or_default();
+    let opt = github_webhook_dts_downloader::Opt {
         version: github_webhook_dts_downloader::Version(octokit_ver),
+        out_path_ts,
         ..Default::default()
-    })?;
+    };
+    run_transform(opt)?;
 
     Ok(())
 }
