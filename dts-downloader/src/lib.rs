@@ -23,7 +23,7 @@ impl Default for Version {
     }
 }
 
-pub struct OutPathTs(PathBuf);
+pub struct OutPathTs(pub PathBuf);
 
 impl Default for OutPathTs {
     fn default() -> Self {
@@ -33,7 +33,7 @@ impl Default for OutPathTs {
     }
 }
 
-pub struct OutPathRs(PathBuf);
+pub struct OutPathRs(pub PathBuf);
 
 impl Default for OutPathRs {
     fn default() -> Self {
@@ -50,13 +50,15 @@ pub fn run_transform(
         out_path_rs: OutPathRs(rs_file),
     }: Opt,
 ) -> Result<()> {
-    // setup .d.ts file
-    let repo = "octokit/webhooks";
-    let url =
-        format!("https://raw.githubusercontent.com/{repo}/{branch}/payload-types/schema.d.ts");
+    if !dts_file.try_exists()? {
+        // setup .d.ts file
+        let repo = "octokit/webhooks";
+        let url =
+            format!("https://raw.githubusercontent.com/{repo}/{branch}/payload-types/schema.d.ts");
 
-    let body = reqwest::blocking::get(url)?.text()?;
-    std::fs::write(&dts_file, body)?;
+        let body = reqwest::blocking::get(url)?.text()?;
+        std::fs::write(&dts_file, body)?;
+    }
 
     let rs = dts2rs(&dts_file);
 
