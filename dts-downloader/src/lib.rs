@@ -23,7 +23,7 @@ impl Default for Version {
     }
 }
 
-pub struct OutPathTs(PathBuf);
+pub struct OutPathTs(pub PathBuf);
 
 impl Default for OutPathTs {
     fn default() -> Self {
@@ -33,7 +33,7 @@ impl Default for OutPathTs {
     }
 }
 
-pub struct OutPathRs(PathBuf);
+pub struct OutPathRs(pub PathBuf);
 
 impl Default for OutPathRs {
     fn default() -> Self {
