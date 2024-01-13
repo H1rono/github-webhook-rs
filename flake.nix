@@ -22,7 +22,18 @@
 
         toolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain;
         craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
-        src = craneLib.cleanCargoSource (craneLib.path ./.);
+        tsFileFilter = path: _type: builtins.match ".*ts$" path != null;
+        src = lib.cleanSourceWith {
+          src = craneLib.path ./.;
+          filter = path: type: (tsFileFilter path type) || (craneLib.filterCargoSources path type);
+        };
+
+        octokit-webhooks = pkgs.fetchFromGitHub {
+          owner = "octokit";
+          repo = "webhooks";
+          rev = "v7.3.1";
+          hash = "sha256-ckGVw5owHTv1h73LGan6mn4PZls4sNjRo/n+rrJHqe0=";
+        };
 
         commonArgs = {
           inherit src;
@@ -41,6 +52,7 @@
 
           # Additional environment variables can be set directly
           CARGO_PROFILE = "dev";
+          WEBHOOK_SCHEMA_DTS = "${octokit-webhooks}/payload-types/schema.d.ts";
         } // builtins.removeAttrs
           (craneLib.crateNameFromCargoToml {
             cargoToml = ./github-webhook/Cargo.toml;
