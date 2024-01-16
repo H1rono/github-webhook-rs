@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Get Rust toolchain
         id: toolchain
@@ -29,10 +29,10 @@ jobs:
           toolchain: ${{ steps.toolchain.outputs.toolchain }}
 
       - name: cache dependencies
-        uses: Swatinem/rust-cache@v2.7.1
+        uses: Swatinem/rust-cache@a22603398250b864f7190077025cf752307154dc # v2.7.2
 
       - name: reviewdog / clippy
-        uses: sksat/action-clippy@v0.4.0
+        uses: sksat/action-clippy@251e5ac439e43b83a33b7997bb12d34306ba2394 # v0.4.0
         with:
           reporter: github-pr-review
           clippy_flags: --all-features
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Get Rust toolchain
         id: toolchain
@@ -56,7 +56,7 @@ jobs:
           toolchain: ${{ steps.toolchain.outputs.toolchain }}
 
       - name: cache dependencies
-        uses: Swatinem/rust-cache@v2.7.1
+        uses: Swatinem/rust-cache@a22603398250b864f7190077025cf752307154dc # v2.7.2
 
       - name: build rustdoc
         run: |
@@ -75,7 +75,7 @@ jobs:
           done
 
       - name: arcive rustdoc
-        uses: actions/upload-pages-artifact@v3.0.0
+        uses: actions/upload-pages-artifact@0252fc4ba7626f0298f0cf00902a25c6afc77fa8 # v3.0.0
         with:
           path: ./target/doc
 
@@ -94,12 +94,38 @@ jobs:
     steps:
       - name: Deploy to GitHub pages
         id: deployment
-        uses: actions/deploy-pages@7a9bd943aa5e5175aeb8502edcc6c1c02d398e10 # v4.0.2
+        uses: actions/deploy-pages@87c3283f01cd6fe19a0ab93a23b2f6fcba5a8e42 # v4.0.3
 
   semver:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - uses: obi1kenobi/cargo-semver-checks-action@v2.2
+      - uses: obi1kenobi/cargo-semver-checks-action@e275dda72e250d4df5b564e969e1348d67fefa52 # v2.2
+
+  msrv:
+    strategy:
+      fail-fast: false
+      matrix:
+        crate-path:
+          - github-webhook
+          - type-generator
+          - dts-downloader
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: cache dependencies
+        uses: Swatinem/rust-cache@a22603398250b864f7190077025cf752307154dc # v2.7.2
+
+      - name: install cargo-msrv
+        run: |
+          cargo install cargo-msrv --version 0.16.0-beta.18
+
+      - name: check MSRV
+        working-directory: ${{ matrix.crate-path }}
+        run: |
+          cargo msrv verify --add-component rustfmt
